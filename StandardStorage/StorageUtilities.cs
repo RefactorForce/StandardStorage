@@ -11,8 +11,14 @@ using System.Text;
 
 namespace StandardStorage
 {
+    /// <summary>
+    /// A collection of useful storage utilities for finding storage paths.
+    /// </summary>
     public static class StorageUtilities
     {
+        /// <summary>
+        /// Creates and returns the full path to an app-specific local user storage folder.
+        /// </summary>
         public static string LocalUserAppDataPath
         {
             get
@@ -34,10 +40,18 @@ namespace StandardStorage
             }
         }
 
-        public static string GetAppSpecificStoragePathFromBasePath(String basePath) => Directory.CreateDirectory(Path.Combine(basePath, CompanyName, ProductName, ProductVersion)).FullName;
+        /// <summary>
+        /// Creates and returns the full path to an app-specific storage folder based on <paramref name="basePath"/>.
+        /// </summary>
+        /// <param name="basePath"></param>
+        /// <returns>returns a full path to the created storage folder.</returns>
+        public static string GetAppSpecificStoragePathFromBasePath(string basePath) => Directory.CreateDirectory(Path.Combine(basePath, CompanyName, ProductName, ProductVersion)).FullName;
 
         static string productVersion;
 
+        /// <summary>
+        /// Gets the product version of the current top-level assembly using this library.
+        /// </summary>
         public static string ProductVersion
         {
             get
@@ -81,6 +95,9 @@ namespace StandardStorage
 
         static string productName;
 
+        /// <summary>
+        /// Gets the prodcut name of the current top-level assembly using this library.
+        /// </summary>
         public static string ProductName
         {
             get
@@ -149,6 +166,9 @@ namespace StandardStorage
 
         static string companyName;
 
+        /// <summary>
+        /// Gets the company name of the current top-level assembly using this library.
+        /// </summary>
         public static string CompanyName
         {
             get
@@ -247,7 +267,13 @@ namespace StandardStorage
         }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern int GetModuleFileName(HandleRef hModule, StringBuilder buffer, int length);
+        private static extern int GetModuleFileName(HandleRef hModule, StringBuilder buffer, int length);
+
+        /// <summary>
+        /// Gets the long path to the module pointed to by <paramref name="hModule"/>.
+        /// </summary>
+        /// <param name="hModule">A handle to the module that the long path is needed for.</param>
+        /// <returns>The long path to the module pointed to by <paramref name="hModule"/></returns>
         public static StringBuilder GetModuleFileNameLongPath(HandleRef hModule)
         {
             StringBuilder buffer = new StringBuilder(260);
@@ -286,6 +312,9 @@ namespace StandardStorage
 
         static string executablePath;
 
+        /// <summary>
+        /// A full path to the current top-level executable assembly using this library.
+        /// </summary>
         public static string ExecutablePath
         {
             get

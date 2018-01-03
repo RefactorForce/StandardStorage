@@ -61,20 +61,20 @@ namespace StandardStorage
             return ExistenceCheckResult.NotFound;
         }
 
+        ///// <param name="failIfFolderDoesNotExist">Whether or not an <see cref="Exceptions.DirectoryNotFoundException"/> should be thrown if the folder path specified by <see cref="Path"/> does not exist.</param>
         /// <summary>
         /// Creates a file in this folder
         /// </summary>
         /// <param name="desiredName">The name of the file to create</param>
         /// <param name="option">Specifies how to behave if the specified file already exists</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <param name="failIfFolderDoesNotExist">Whether or not an <see cref="Exceptions.DirectoryNotFoundException"/> should be thrown if the folder path specified by <see cref="Path"/> does not exist.</param>
         /// <returns>The newly created file</returns>
         public async Task<IFile> CreateFileAsync(string desiredName, CreationCollisionOption option, CancellationToken cancellationToken = default(CancellationToken)/*, bool failIfFolderDoesNotExist = true*/)
         {
             Ensure.NotNullOrEmpty(desiredName, nameof(desiredName));
 
             await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
-            await EnsureExistanceAsync();
+            EnsureExistance();
 
             string newPath = System.IO.Path.Combine(Path, desiredName);
             if (System.IO.File.Exists(newPath))
@@ -112,8 +112,8 @@ namespace StandardStorage
         {
             Ensure.NotNullOrEmpty(desiredName, nameof(desiredName));
 
-            //await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
-            await EnsureExistanceAsync(cancellationToken);
+            await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
+            EnsureExistance(cancellationToken);
             string newPath = System.IO.Path.Combine(Path, desiredName);
             if (Directory.Exists(newPath))
             {
@@ -145,7 +145,7 @@ namespace StandardStorage
         {
             if (!CanDelete) throw new IOException("Cannot delete root storage folder.");
             await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
-            await EnsureExistanceAsync();
+            EnsureExistance();
             Directory.Delete(Path, true);
         }
 
@@ -172,8 +172,8 @@ namespace StandardStorage
         /// <returns>A list of the files in the folder.</returns>
         public async Task<IList<IFile>> GetFilesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            //await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
-            await EnsureExistanceAsync();
+            await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
+            EnsureExistance();
             return Directory.GetFiles(Path).Select(file => new File(file)).ToList<IFile>().AsReadOnly();
         }
 
@@ -198,8 +198,8 @@ namespace StandardStorage
         /// <returns>A list of subfolders in the folder.</returns>
         public async Task<IList<IFolder>> GetFoldersAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            //await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
-            await EnsureExistanceAsync();
+            await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
+            EnsureExistance();
             return Directory.GetDirectories(Path).Select(d => new Folder(d, true)).ToList<IFolder>().AsReadOnly();
         }
 
@@ -207,11 +207,12 @@ namespace StandardStorage
         /// Ensures that there is a folder at the location specified by <see cref="Path"/>. If one doesn't exist, it will be created.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token to use.</param>
+        /// <param name="throwIfFolderDoesNotExist">A flag for whether the method should throw an exception if the folder at the location specified by <see cref="Path"/> does not exist. If set to <see langword="false"/>, the folder will be created if not present.</param>
         /// <returns>A task which will complete once the folder has been created or found.</returns>
-        public async Task EnsureExistanceAsync(CancellationToken cancellationToken = default(CancellationToken), bool failIfFolderDoesNotExist = true, bool runSynchronously = true)
+        public /*async*/ /*Task*/void EnsureExistance(CancellationToken cancellationToken = default(CancellationToken), bool throwIfFolderDoesNotExist = true/*, bool runSynchronously = true*/)
         {
-            if (!runSynchronously) await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
-            if (failIfFolderDoesNotExist && !Directory.Exists(Path)) throw new DirectoryNotFoundException($"A folder was not found at the path {Path}.");
+            //if (!runSynchronously) await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
+            if (throwIfFolderDoesNotExist && !Directory.Exists(Path)) throw new DirectoryNotFoundException($"A folder was not found at the path {Path}.");
             Directory.CreateDirectory(Path);
         }
     }

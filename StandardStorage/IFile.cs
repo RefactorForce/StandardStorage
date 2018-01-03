@@ -21,6 +21,9 @@ namespace StandardStorage
         ReadAndWrite
     }
 
+    /// <summary>
+    /// Represents a file
+    /// </summary>
     public interface IFile
     {
         /// <summary>
