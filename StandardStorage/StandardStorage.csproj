@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>StandardStorage</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>TheFanatr</Authors>
+    <Description>A reimplementation of PCLStorage that keeps 100% of the publicly-accessible API, and is contained in only one .NET Standard assembly that does not rely on any external framework code (such as Windows Forms) to run. Everything should work any platform.</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>First major release after GitHub repository creation</PackageReleaseNotes>
+    <Copyright>Copyright 2018 (c) Alex Fanat. All rights reserved.</Copyright>
+    <PackageTags>PCLStorage portable netstandard storage PCL standard universal cache caching AppData data</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
