@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MSTest.TestFramework" Version="1.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StandardStorage\StandardStorage.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\StandardStorage\AsynchronityUtilities.cs">
+      <Link>AsynchronityUtilities.cs</Link>
+    </Compile>
+  </ItemGroup>
+
+</Project>
