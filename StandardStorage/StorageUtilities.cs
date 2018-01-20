@@ -19,26 +19,7 @@ namespace StandardStorage
         /// <summary>
         /// Creates and returns the full path to an app-specific local user storage folder.
         /// </summary>
-        public static string LocalUserAppDataPath
-        {
-            get
-            {
-                try
-                {
-                    if (System.Deployment.Application.ApplicationDeployment.IsNetworkDeployed)
-                    {
-                        if (AppDomain.CurrentDomain.GetData("DataDirectory") is string data)
-                        {
-                            return data;
-                        }
-                    }
-                }
-                catch
-                {
-                }
-                return GetAppSpecificStoragePathFromBasePath(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-            }
-        }
+        public static string LocalUserAppDataPath => GetAppSpecificStoragePathFromBasePath(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
 
         /// <summary>
         /// Creates and returns the full path to an app-specific storage folder based on <paramref name="basePath"/>.
@@ -58,36 +39,17 @@ namespace StandardStorage
             {
                 if (productVersion == null)
                 {
+                    // Try custom attribute.
+                    object[] attrs = Assembly.GetEntryAssembly()?.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false);
+                    if (attrs != null && attrs.Length > 0)
+                        productVersion = ((AssemblyInformationalVersionAttribute)attrs[0]).InformationalVersion;
 
-                    // custom attribute
-                    //
-                    Assembly entryAssembly = Assembly.GetEntryAssembly();
-                    if (entryAssembly != null)
-                    {
-                        object[] attrs = entryAssembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false);
-                        if (attrs != null && attrs.Length > 0)
-                        {
-                            productVersion = ((AssemblyInformationalVersionAttribute)attrs[0]).InformationalVersion;
-                        }
-                    }
+                    // Try win32 version info.
+                    else if ((productVersion = GetAppFileVersionInfo().ProductVersion) != null)
+                        productVersion = productVersion.Trim();
 
-                    // win32 version info
-                    //
-                    if (productVersion == null || productVersion.Length == 0)
-                    {
-                        productVersion = GetAppFileVersionInfo().ProductVersion;
-                        if (productVersion != null)
-                        {
-                            productVersion = productVersion.Trim();
-                        }
-                    }
-
-                    // fake it
-                    //
-                    if (productVersion == null || productVersion.Length == 0)
-                    {
-                        productVersion = "1.0.0.0";
-                    }
+                    // Fake it.
+                    else productVersion = "1.0.0.0";
                 }
                 return productVersion;
             }
@@ -105,32 +67,18 @@ namespace StandardStorage
                 if (productName == null)
                 {
 
-                    // custom attribute
-                    //
-                    Assembly entryAssembly = Assembly.GetEntryAssembly();
-                    if (entryAssembly != null)
-                    {
-                        object[] attrs = entryAssembly.GetCustomAttributes(typeof(AssemblyProductAttribute), false);
-                        if (attrs != null && attrs.Length > 0)
-                        {
-                            productName = ((AssemblyProductAttribute)attrs[0]).Product;
-                        }
-                    }
+                    // Try custom attribute.
+                    object[] attrs = Assembly.GetEntryAssembly()?.GetCustomAttributes(typeof(AssemblyProductAttribute), false);
+                    if (attrs != null && attrs.Length > 0)
+                        productName = ((AssemblyProductAttribute)attrs[0]).Product;
 
-                    // win32 version info
-                    //
-                    if (productName == null || productName.Length == 0)
-                    {
-                        productName = GetAppFileVersionInfo().ProductName;
-                        if (productName != null)
-                        {
-                            productName = productName.Trim();
-                        }
-                    }
+                    // Try win32 version info.
+                    else if ((productName = GetAppFileVersionInfo().ProductName) != null)
+                        productName = productName.Trim();
 
-                    // fake it with namespace
-                    // won't work with MC++ see GetAppMainType.
-                    if (productName == null || productName.Length == 0)
+                    // Fake it with the main root namespace.
+                    // WARNING: Does not work with MC++. See GetAppMainType.
+                    else
                     {
                         Type t = GetAppMainType();
 
@@ -142,24 +90,15 @@ namespace StandardStorage
                             {
                                 int lastDot = ns.LastIndexOf(".");
                                 if (lastDot != -1 && lastDot < ns.Length - 1)
-                                {
                                     productName = ns.Substring(lastDot + 1);
-                                }
-                                else
-                                {
-                                    productName = ns;
-                                }
+                                else productName = ns;
                             }
-                            else
-                            {
-                                // last ditch... use the main type
-                                //
-                                productName = t.Name;
-                            }
+
+                            // Last ditch: Use the main type's name.
+                            else productName = t.Name;
                         }
                     }
                 }
-
                 return productName;
             }
         }
@@ -176,32 +115,18 @@ namespace StandardStorage
                 if (companyName == null)
                 {
 
-                    // custom attribute
-                    //
-                    Assembly entryAssembly = Assembly.GetEntryAssembly();
-                    if (entryAssembly != null)
-                    {
-                        object[] attrs = entryAssembly.GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
-                        if (attrs != null && attrs.Length > 0)
-                        {
-                            companyName = ((AssemblyCompanyAttribute)attrs[0]).Company;
-                        }
-                    }
+                    // Try custom attribute.
+                    object[] attrs = Assembly.GetEntryAssembly()?.GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
+                    if (attrs != null && attrs.Length > 0)
+                        companyName = ((AssemblyCompanyAttribute)attrs[0]).Company;
 
-                    // win32 version
-                    //
-                    if (companyName == null || companyName.Length == 0)
-                    {
-                        companyName = GetAppFileVersionInfo().CompanyName;
-                        if (companyName != null)
-                        {
-                            companyName = companyName.Trim();
-                        }
-                    }
+                    // Try win32 version info.
+                    else if ((companyName = GetAppFileVersionInfo().CompanyName) != null)
+                        companyName = companyName.Trim();
 
-                    // fake it with a namespace
-                    // won't work with MC++ see GetAppMainType.
-                    if (companyName == null || companyName.Length == 0)
+                    // Fake it with the main root namespace.
+                    // WARNING: Does not work with MC++. See GetAppMainType.
+                    else
                     {
                         Type t = GetAppMainType();
 
@@ -213,20 +138,12 @@ namespace StandardStorage
                             {
                                 int firstDot = ns.IndexOf(".");
                                 if (firstDot != -1)
-                                {
                                     companyName = ns.Substring(0, firstDot);
-                                }
-                                else
-                                {
-                                    companyName = ns;
-                                }
+                                else companyName = ns;
                             }
-                            else
-                            {
-                                // last ditch... no namespace, use product name...
-                                //
-                                companyName = ProductName;
-                            }
+
+                            // Last ditch: Use the main type's name.
+                            else companyName = ProductName;
                         }
                     }
                 }
@@ -243,26 +160,13 @@ namespace StandardStorage
                 Type t = GetAppMainType();
                 if (t != null)
                 {
-                    // SECREVIEW : This Assert is ok, getting the module's version is a safe operation, 
-                    //             the result is provided by the system.
-                    //
                     new FileIOPermission(PermissionState.None) { AllFiles = FileIOPermissionAccess.PathDiscovery | FileIOPermissionAccess.Read }.Assert();
 
-                    try
-                    {
-                        appFileVersion = FileVersionInfo.GetVersionInfo(t.Module.FullyQualifiedName);
-                    }
-                    finally
-                    {
-                        CodeAccessPermission.RevertAssert();
-                    }
+                    try { appFileVersion = FileVersionInfo.GetVersionInfo(t.Module.FullyQualifiedName); }
+                    finally { CodeAccessPermission.RevertAssert(); }
                 }
-                else
-                {
-                    appFileVersion = FileVersionInfo.GetVersionInfo(ExecutablePath);
-                }
+                else appFileVersion = FileVersionInfo.GetVersionInfo(ExecutablePath);
             }
-
             return appFileVersion;
         }
 
@@ -281,9 +185,7 @@ namespace StandardStorage
             int length = 0;
             // Iterating by allocating chunk of memory each time we find the length is not sufficient.
             // Performance should not be an issue for current MAX_PATH length due to this change.
-            while (((length = GetModuleFileName(hModule, buffer, buffer.Capacity)) == buffer.Capacity)
-                && Marshal.GetLastWin32Error() == 122
-                && buffer.Capacity < short.MaxValue)
+            while (((length = GetModuleFileName(hModule, buffer, buffer.Capacity)) == buffer.Capacity) && Marshal.GetLastWin32Error() == 122 && buffer.Capacity < short.MaxValue)
             {
                 noOfTimes += 2; // Increasing buffer size by 520 in each iteration.
                 int capacity = noOfTimes * 260 < short.MaxValue ? noOfTimes * 260 : short.MaxValue;
@@ -299,14 +201,8 @@ namespace StandardStorage
 
             FileIOPermission fiop = new FileIOPermission(PermissionState.None) { AllFiles = FileIOPermissionAccess.PathDiscovery };
             fiop.Assert();
-            try
-            {
-                full = Path.GetFullPath(fileName);
-            }
-            finally
-            {
-                CodeAccessPermission.RevertAssert();
-            }
+            try { full = Path.GetFullPath(fileName); }
+            finally { CodeAccessPermission.RevertAssert(); }
             return full;
         }
 
@@ -323,29 +219,19 @@ namespace StandardStorage
                 {
                     Assembly asm = Assembly.GetEntryAssembly();
                     if (asm == null)
-                    {
-                        StringBuilder sb = GetModuleFileNameLongPath(new HandleRef(null, IntPtr.Zero));
-                        executablePath = UnsafeGetFullPath(sb.ToString());
-                    }
+                        executablePath = UnsafeGetFullPath(GetModuleFileNameLongPath(new HandleRef(null, IntPtr.Zero)).ToString());
                     else
                     {
                         String cb = asm.CodeBase;
                         Uri codeBase = new Uri(cb);
                         if (codeBase.IsFile)
-                        {
-                            executablePath = codeBase.LocalPath + Uri.UnescapeDataString(codeBase.Fragment); ;
-                        }
-                        else
-                        {
-                            executablePath = codeBase.ToString();
-                        }
+                            executablePath = codeBase.LocalPath + Uri.UnescapeDataString(codeBase.Fragment);
+                        else executablePath = codeBase.ToString();
                     }
                 }
                 Uri exeUri = new Uri(executablePath);
                 if (exeUri.Scheme == "file")
-                {
                     new FileIOPermission(FileIOPermissionAccess.PathDiscovery, executablePath).Demand();
-                }
                 return executablePath;
             }
         }
