@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,6 +29,7 @@ namespace StandardStorage
         /// The name of the file
         /// </summary>
         string Name { get; }
+
         /// <summary>
         /// The "full path" of the file, which should uniquely identify it within a given <see cref="IFileSystem"/>
         /// </summary>

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,7 +8,7 @@ namespace StandardStorage
     /// <summary>
     /// Extensions for use internally by PCLStorage for awaiting.
     /// </summary>
-    internal partial class AsynchronityUtilities
+    static class AsynchronityUtilities
     {
         /// <summary>
         /// Causes the caller who awaits this method to
@@ -27,8 +25,8 @@ namespace StandardStorage
 
         internal struct TaskSchedulerAwaiter : INotifyCompletion
         {
-            private TaskScheduler taskScheduler;
-            private CancellationToken cancellationToken;
+            TaskScheduler taskScheduler;
+            CancellationToken cancellationToken;
 
             internal TaskSchedulerAwaiter(TaskScheduler taskScheduler, CancellationToken cancellationToken)
             {

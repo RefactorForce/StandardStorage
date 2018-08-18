@@ -1,10 +1,8 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace StandardStorage
 {
@@ -52,7 +50,7 @@ namespace StandardStorage
         /// </returns>
         public async Task<ExistenceCheckResult> CheckExistsAsync(string name, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Ensure.NotNullOrEmpty(name, nameof (name));
+            Ensure.NotNullOrEmpty(name, nameof(name));
 
             await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
             string pathToCheck = System.IO.Path.Combine(Path, name);
@@ -84,9 +82,11 @@ namespace StandardStorage
                     case CreationCollisionOption.GenerateUniqueName:
                         for (int num = 2; System.IO.File.Exists(newPath); newPath = System.IO.Path.Combine(Path, System.IO.Path.GetFileNameWithoutExtension(desiredName) + " (" + num++ + ")" + System.IO.Path.GetExtension(desiredName))) cancellationToken.ThrowIfCancellationRequested();
                         break;
+
                     case CreationCollisionOption.ReplaceExisting:
                         System.IO.File.Delete(newPath);
                         break;
+
                     case CreationCollisionOption.FailIfExists:
                         throw new IOException("File already exists: " + newPath);
                     case CreationCollisionOption.OpenIfExists:
@@ -98,7 +98,7 @@ namespace StandardStorage
 #pragma warning restore CS0642 // Possible mistaken empty statement
 
             skipFileCreation:
-            return new File (newPath);
+            return new File(newPath);
         }
 
         /// <summary>
@@ -122,9 +122,11 @@ namespace StandardStorage
                     case CreationCollisionOption.GenerateUniqueName:
                         for (int num = 2; Directory.Exists(newPath); newPath = System.IO.Path.Combine(Path, desiredName + " (" + num++ + ")")) cancellationToken.ThrowIfCancellationRequested();
                         break;
+
                     case CreationCollisionOption.ReplaceExisting:
                         Directory.Delete(newPath, true);
                         break;
+
                     case CreationCollisionOption.FailIfExists:
                         throw new IOException("Directory already exists: " + newPath);
                     case CreationCollisionOption.OpenIfExists:
@@ -140,6 +142,7 @@ namespace StandardStorage
         /// <summary>
         /// Deletes the folder found at the location specified by <see cref="Path"/>.
         /// </summary>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the operation.</param>
         /// <returns>A task which will complete after the folder is deleted.</returns>
         public async Task DeleteAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -157,7 +160,7 @@ namespace StandardStorage
         /// <returns>The requested file, or null if it does not exist</returns>
         public async Task<IFile> GetFileAsync(string name, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Ensure.NotNullOrEmpty(name, nameof (name));
+            Ensure.NotNullOrEmpty(name, nameof(name));
 
             await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
 
@@ -169,6 +172,7 @@ namespace StandardStorage
         /// <summary>
         /// Gets a list of the files in this folder.
         /// </summary>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the operation.</param>
         /// <returns>A list of the files in the folder.</returns>
         public async Task<IList<IFile>> GetFilesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {

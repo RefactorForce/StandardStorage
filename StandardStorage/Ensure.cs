@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Text;
 
 namespace StandardStorage
 {
     /// <summary>
     /// Common runtime checks that throw ArgumentExceptions upon failure.
     /// </summary>
-    internal static class Ensure
+    static class Ensure
     {
         /// <summary>
         /// Throws an exception if the specified parameter's value is null.

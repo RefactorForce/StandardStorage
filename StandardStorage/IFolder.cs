@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +13,7 @@ namespace StandardStorage
         /// The name of the folder
         /// </summary>
         string Name { get; }
+
         /// <summary>
         /// The "full path" of the folder, which should uniquely identify it within a given <see cref="IFileSystem"/>
         /// </summary>

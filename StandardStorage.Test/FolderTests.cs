@@ -13,7 +13,7 @@ namespace StandardStorage.Test
     [TestClass]
     public class FolderTests
     {
-        IFileSystem TestFileSystem { get { return FileSystem.Current; } }
+        IFileSystem TestFileSystem => FileSystem.Current;
 
         [TestMethod]
         public async Task GetFile()
@@ -92,8 +92,8 @@ namespace StandardStorage.Test
         {
             //  Arrange
             IFolder folder = await TestFileSystem.LocalStorage.CreateFolderAsync("GetFilesMultiple_Folder", CreationCollisionOption.FailIfExists);
-            var fileNames = new[] { "hello.txt", "file.zzz", "anotherone", "42" };
-            foreach (var fn in fileNames)
+            string[] fileNames = { "hello.txt", "file.zzz", "anotherone", "42" };
+            foreach (string fn in fileNames)
             {
                 await folder.CreateFileAsync(fn, CreationCollisionOption.FailIfExists);
             }
@@ -103,7 +103,7 @@ namespace StandardStorage.Test
 
             //  Assert
             Assert.AreEqual(fileNames.Length, files.Count, "File count");
-            foreach (var fn in fileNames)
+            foreach (string fn in fileNames)
             {
                 Assert.IsTrue(files.Count(f => f.Name == fn) == 1, "File " + fn + " in results");
             }
@@ -191,7 +191,7 @@ namespace StandardStorage.Test
 
             //  Assert
             Assert.AreEqual(subFolderName, newFolder.Name);
-            var files = await newFolder.GetFilesAsync();
+            IList<IFile> files = await newFolder.GetFilesAsync();
             Assert.AreEqual(0, files.Count, "New folder file count");
 
             //  Cleanup
@@ -223,15 +223,15 @@ namespace StandardStorage.Test
         public async Task ConcurrentCreateFolder()
         {
             //  Arrange
-            var folderName = "json";
-            var items = new List<Task<IFolder>>();
+            string folderName = "json";
+            List<Task<IFolder>> items = new List<Task<IFolder>>();
             int iterations = 10;
 
-            for (var i = 0; i < iterations; i++)
+            for (int i = 0; i < iterations; i++)
             {
-                var task = Task.Run(async () =>
+                Task<IFolder> task = Task.Run(async () =>
                     {
-                        var folder = await FileSystem.Current.LocalStorage.CreateFolderAsync(folderName, CreationCollisionOption.OpenIfExists);
+                        IFolder folder = await FileSystem.Current.LocalStorage.CreateFolderAsync(folderName, CreationCollisionOption.OpenIfExists);
                         return folder;
                     });
                 items.Add(task);
@@ -281,7 +281,7 @@ namespace StandardStorage.Test
 
             //  Assert
             Assert.AreEqual(subFolderName, newFolder.Name);
-            var files = await newFolder.GetFilesAsync();
+            IList<IFile> files = await newFolder.GetFilesAsync();
             Assert.AreEqual(1, files.Count);
             Assert.AreEqual("FileInFolder.txt", files[0].Name);
 
@@ -368,8 +368,8 @@ namespace StandardStorage.Test
         {
             //  Arrange
             IFolder folder = await TestFileSystem.LocalStorage.CreateFolderAsync("GetFoldersMultiple_Folder", CreationCollisionOption.FailIfExists);
-            var folderNames = new[] { "One", "2", "Hello" };
-            foreach (var fn in folderNames)
+            string[] folderNames = { "One", "2", "Hello" };
+            foreach (string fn in folderNames)
             {
                 await folder.CreateFolderAsync(fn, CreationCollisionOption.FailIfExists);
             }
@@ -379,7 +379,7 @@ namespace StandardStorage.Test
 
             //  Assert
             Assert.AreEqual(folderNames.Length, folders.Count, "Folder count");
-            foreach (var fn in folderNames)
+            foreach (string fn in folderNames)
             {
                 Assert.IsTrue(folders.Count(f => f.Name == fn) == 1, "Folder " + fn + " in results");
             }
@@ -400,7 +400,7 @@ namespace StandardStorage.Test
             await folder.DeleteAsync();
 
             //  Assert
-            var folders = await rootFolder.GetFoldersAsync();
+            IList<IFolder> folders = await rootFolder.GetFoldersAsync();
             Assert.IsFalse(folders.Any(f => f.Name == subFolderName));
         }
 
@@ -419,7 +419,7 @@ namespace StandardStorage.Test
             await folder.DeleteAsync();
 
             //  Assert
-            var folders = await rootFolder.GetFoldersAsync();
+            IList<IFolder> folders = await rootFolder.GetFoldersAsync();
             Assert.IsFalse(folders.Any(f => f.Name == folderToDeleteName));
             Assert.IsNull(await TestFileSystem.GetFileFromPathAsync(fileInFolder.Path));
             Assert.IsNull(await TestFileSystem.GetFolderFromPathAsync(subfolder.Path));
@@ -449,8 +449,8 @@ namespace StandardStorage.Test
         public async Task CheckExists()
         {
             // setup
-            var file = await TestFileSystem.LocalStorage.CreateFileAsync("somefile", CreationCollisionOption.OpenIfExists);
-            var folder = await TestFileSystem.LocalStorage.CreateFolderAsync("somefolder", CreationCollisionOption.OpenIfExists);
+            IFile file = await TestFileSystem.LocalStorage.CreateFileAsync("somefile", CreationCollisionOption.OpenIfExists);
+            IFolder folder = await TestFileSystem.LocalStorage.CreateFolderAsync("somefolder", CreationCollisionOption.OpenIfExists);
 
             // assertions
             Assert.AreEqual(ExistenceCheckResult.NotFound, await TestFileSystem.LocalStorage.CheckExistsAsync("no-file-here"));

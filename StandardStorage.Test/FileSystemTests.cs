@@ -13,7 +13,7 @@ namespace StandardStorage.Test
     [TestClass]
     public class FileSystemTests
     {
-        IFileSystem TestFileSystem { get { return FileSystem.Current; } }
+        IFileSystem TestFileSystem => FileSystem.Current;
 
         [TestMethod]
         public void LocalStorageExists()
@@ -117,8 +117,8 @@ namespace StandardStorage.Test
 
             //  Act
             IFolder gottenFolder = await TestFileSystem.GetFolderFromPathAsync(expectedPath);
-            var files = await gottenFolder.GetFilesAsync();
-            var fileNames = files.Select(f => f.Name);
+            IList<IFile> files = await gottenFolder.GetFilesAsync();
+            IEnumerable<string> fileNames = files.Select(f => f.Name);
 
             //  Assert
             Assert.AreEqual(expectedPath, gottenFolder.Path, "gottenFolder.Path");

@@ -15,8 +15,8 @@ namespace StandardStorage.Test
         {
             // Make this thread look like the main thread by
             // setting up a synchronization context.
-            var dispatcher = new SynchronizationContext();
-            var original = SynchronizationContext.Current;
+            SynchronizationContext dispatcher = new SynchronizationContext();
+            SynchronizationContext original = SynchronizationContext.Current;
             SynchronizationContext.SetSynchronizationContext(dispatcher);
             try
             {
@@ -36,44 +36,48 @@ namespace StandardStorage.Test
         [TestMethod]
         public void SwitchOffMainThreadAsync_OffMainThread()
         {
-            var awaitable = AsynchronityUtilities.SwitchOffMainThreadAsync(CancellationToken.None);
-            var awaiter = awaitable.GetAwaiter();
+            AsynchronityUtilities.TaskSchedulerAwaiter awaitable = AsynchronityUtilities.SwitchOffMainThreadAsync(CancellationToken.None);
+            AsynchronityUtilities.TaskSchedulerAwaiter awaiter = awaitable.GetAwaiter();
             Assert.IsTrue(awaiter.IsCompleted); // guarantees the caller wouldn't have switched threads.
         }
 
         [TestMethod]
         public void SwitchOffMainThreadAsync_CanceledBeforeSwitch()
         {
-            var cts = new CancellationTokenSource();
-            cts.Cancel();
-            try
+            using (CancellationTokenSource cts = new CancellationTokenSource())
             {
-                AsynchronityUtilities.SwitchOffMainThreadAsync(cts.Token);
-                Assert.Fail("Expected OperationCanceledException not thrown.");
-            }
-            catch (OperationCanceledException ex)
-            {
-                Assert.AreEqual(cts.Token, ex.CancellationToken);
+                cts.Cancel();
+                try
+                {
+                    AsynchronityUtilities.SwitchOffMainThreadAsync(cts.Token);
+                    Assert.Fail("Expected OperationCanceledException not thrown.");
+                }
+                catch (OperationCanceledException ex)
+                {
+                    Assert.AreEqual(cts.Token, ex.CancellationToken);
+                }
             }
         }
 
         [TestMethod]
         public void SwitchOffMainThreadAsync_CanceledMidSwitch()
         {
-            var cts = new CancellationTokenSource();
-            var awaitable = AsynchronityUtilities.SwitchOffMainThreadAsync(cts.Token);
-            var awaiter = awaitable.GetAwaiter();
-
-            cts.Cancel();
-
-            try
+            using (CancellationTokenSource cts = new CancellationTokenSource())
             {
-                awaiter.GetResult();
-                Assert.Fail("Expected OperationCanceledException not thrown.");
-            }
-            catch (OperationCanceledException ex)
-            {
-                Assert.AreEqual(cts.Token, ex.CancellationToken);
+                AsynchronityUtilities.TaskSchedulerAwaiter awaitable = AsynchronityUtilities.SwitchOffMainThreadAsync(cts.Token);
+                AsynchronityUtilities.TaskSchedulerAwaiter awaiter = awaitable.GetAwaiter();
+
+                cts.Cancel();
+
+                try
+                {
+                    awaiter.GetResult();
+                    Assert.Fail("Expected OperationCanceledException not thrown.");
+                }
+                catch (OperationCanceledException ex)
+                {
+                    Assert.AreEqual(cts.Token, ex.CancellationToken);
+                }
             }
         }
     }

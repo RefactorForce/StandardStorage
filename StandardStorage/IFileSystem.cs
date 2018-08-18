@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace StandardStorage
@@ -12,8 +11,9 @@ namespace StandardStorage
         /// <summary>
         /// Creates a new file with a unique name of the form "name (2).txt"
         /// </summary>
-        /// 
+        ///
         GenerateUniqueName = 0,
+
         /// <summary>
         /// Replaces any existing file with a new (empty) one
         /// </summary>
@@ -84,6 +84,7 @@ namespace StandardStorage
         /// A folder representing storage which is local to the current device
         /// </summary>
         IFolder LocalStorage { get; }
+
         /// <summary>
         /// A folder representing storage which may be synced with other devices for the same user
         /// </summary>

@@ -13,7 +13,7 @@ namespace StandardStorage.Test
     [TestClass]
     public class FileTests
     {
-        IFileSystem TestFileSystem { get { return FileSystem.Current; } }
+        IFileSystem TestFileSystem => FileSystem.Current;
 
         [TestMethod]
         public async Task GetFileThrowsWhenFileDoesNotExist()
@@ -46,7 +46,7 @@ namespace StandardStorage.Test
         {
             //  Arrange
             IFolder folder = TestFileSystem.LocalStorage;
-            string subFolderName = "CreateFileSubFolder";
+            string subFolderName = nameof(CreateFileSubFolder);
             IFolder subFolder = await folder.CreateFolderAsync(subFolderName, CreationCollisionOption.FailIfExists);
             string fileName = "fileToCreateInSubFolder.txt";
 
@@ -173,7 +173,7 @@ namespace StandardStorage.Test
             await file.DeleteAsync();
 
             //	Assert
-            var files = await folder.GetFilesAsync();
+            IList<IFile> files = await folder.GetFilesAsync();
             Assert.IsFalse(files.Any(f => f.Name == fileName));
         }
 
@@ -334,7 +334,7 @@ namespace StandardStorage.Test
             //	Assert
             Assert.AreEqual(renamedFile, file.Name);
             Assert.AreEqual(Path.Combine(TestFileSystem.LocalStorage.Path, file.Name), file.Path);
-            var files = await folder.GetFilesAsync();
+            IList<IFile> files = await folder.GetFilesAsync();
             Assert.IsFalse(files.Any(f => f.Name == originalFileName));
             Assert.IsTrue(files.Any(f => f.Name == renamedFile));
 
@@ -356,7 +356,7 @@ namespace StandardStorage.Test
             await Assert.ThrowsExceptionAsync<IOException>(async () => await file.RenameAsync(renamedFile, NameCollisionOption.FailIfExists));
             Assert.AreEqual(originalFileName, file.Name);
 
-            var files = await folder.GetFilesAsync();
+            IList<IFile> files = await folder.GetFilesAsync();
             Assert.IsTrue(files.Any(f => f.Name == renamedFile));
             Assert.IsTrue(files.Any(f => f.Name == originalFileName));
 
@@ -381,7 +381,7 @@ namespace StandardStorage.Test
 
             // Assert
             Assert.AreEqual(fileName1_renamed, file1.Name);
-            var files = await folder.GetFilesAsync();
+            IList<IFile> files = await folder.GetFilesAsync();
             Assert.IsFalse(files.Any(f => f.Name == fileName1));
             Assert.IsTrue(files.Any(f => f.Name == fileName2));
             Assert.IsTrue(files.Any(f => f.Name == fileName1_renamed));
@@ -405,7 +405,7 @@ namespace StandardStorage.Test
             await file.RenameAsync(renamedFile, NameCollisionOption.ReplaceExisting);
             Assert.AreEqual(renamedFile, file.Name);
 
-            var files = await folder.GetFilesAsync();
+            IList<IFile> files = await folder.GetFilesAsync();
             Assert.IsTrue(files.Any(f => f.Name == renamedFile));
             Assert.IsFalse(files.Any(f => f.Name == originalFileName));
 
@@ -449,7 +449,7 @@ namespace StandardStorage.Test
             //	Assert
             Assert.AreEqual(movedFile, file.Name);
             Assert.AreEqual(Path.Combine(TestFileSystem.LocalStorage.Path, file.Name), file.Path);
-            var files = await folder.GetFilesAsync();
+            IList<IFile> files = await folder.GetFilesAsync();
             Assert.IsFalse(files.Any(f => f.Name == originalFileName));
             Assert.IsTrue(files.Any(f => f.Name == movedFile));
 
@@ -464,8 +464,8 @@ namespace StandardStorage.Test
             IFolder folder = TestFileSystem.LocalStorage;
             string originalFileName = "fileToMove.txt";
             IFile file = await folder.CreateFileAsync(originalFileName, CreationCollisionOption.FailIfExists);
-            var subfolder = await folder.CreateFolderAsync("subfolder", CreationCollisionOption.FailIfExists);
-            
+            IFolder subfolder = await folder.CreateFolderAsync("subfolder", CreationCollisionOption.FailIfExists);
+
             //	Act
             string movedFile = "movedFile.txt";
             await file.MoveAsync(Path.Combine(subfolder.Path, movedFile));
@@ -473,7 +473,7 @@ namespace StandardStorage.Test
             //	Assert
             Assert.AreEqual(movedFile, file.Name);
             Assert.AreEqual(Path.Combine(subfolder.Path, file.Name), file.Path);
-            var files = await folder.GetFilesAsync();
+            IList<IFile> files = await folder.GetFilesAsync();
             Assert.IsFalse(files.Any(f => f.Name == originalFileName));
             Assert.IsFalse(files.Any(f => f.Name == movedFile));
             files = await subfolder.GetFilesAsync();
@@ -498,7 +498,7 @@ namespace StandardStorage.Test
             await Assert.ThrowsExceptionAsync<IOException>(async () => await file.MoveAsync(Path.Combine(folder.Path, movedFile), NameCollisionOption.FailIfExists));
             Assert.AreEqual(originalFileName, file.Name);
 
-            var files = await folder.GetFilesAsync();
+            IList<IFile> files = await folder.GetFilesAsync();
             Assert.IsTrue(files.Any(f => f.Name == movedFile));
             Assert.IsTrue(files.Any(f => f.Name == originalFileName));
 
@@ -523,9 +523,9 @@ namespace StandardStorage.Test
             // Assert
             string file1NameWithoutExtension = file1.Name.Substring(0, file1.Name.IndexOf('.'));
             string fileName2WithoutExtension = fileName2.Substring(0, fileName2.IndexOf('.'));
-            Assert.IsTrue(file1NameWithoutExtension.StartsWith(fileName2WithoutExtension));
+            Assert.IsTrue(file1NameWithoutExtension.StartsWith(fileName2WithoutExtension, StringComparison.CurrentCulture));
             Assert.IsFalse(file1NameWithoutExtension.Equals(fileName2WithoutExtension));
-            var files = await folder.GetFilesAsync();
+            IList<IFile> files = await folder.GetFilesAsync();
             Assert.IsFalse(files.Any(f => f.Name == fileName1));
             Assert.IsTrue(files.Any(f => f.Name == fileName2));
             Assert.IsTrue(files.Any(f => f.Name == file1.Name));
@@ -549,7 +549,7 @@ namespace StandardStorage.Test
             await file.MoveAsync(Path.Combine(folder.Path, movedFile), NameCollisionOption.ReplaceExisting);
             Assert.AreEqual(movedFile, file.Name);
 
-            var files = await folder.GetFilesAsync();
+            IList<IFile> files = await folder.GetFilesAsync();
             Assert.IsTrue(files.Any(f => f.Name == movedFile));
             Assert.IsFalse(files.Any(f => f.Name == originalFileName));
 

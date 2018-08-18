@@ -11,9 +11,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace StandardStorage.Test
 {
 	[TestClass]
-    public class FileTestsForDesktop
+    public class ExtensiveTests
     {
-        IFileSystem TestFileSystem { get { return FileSystem.Current; } }
+        IFileSystem TestFileSystem => FileSystem.Current;
 
         [TestMethod]
         public void OpenFileForRead_NoHangForAsync()

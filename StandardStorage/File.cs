@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,6 +29,7 @@ namespace StandardStorage
         /// <summary>
         /// Deletes the file.
         /// </summary>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> for the operation.</param>
         /// <returns>A task which will complete after the file is deleted.</returns>
         public async Task DeleteAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -99,6 +97,7 @@ namespace StandardStorage
             {
                 case FileAccess.Read:
                     return System.IO.File.OpenRead(Path);
+
                 case FileAccess.ReadAndWrite:
                     return System.IO.File.Open(Path, FileMode.Open, System.IO.FileAccess.ReadWrite);
             }

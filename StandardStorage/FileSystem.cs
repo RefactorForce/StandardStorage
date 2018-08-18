@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,7 +35,7 @@ namespace StandardStorage
         /// <returns>A file for the given path, or null if it does not exist.</returns>
         public async Task<IFile> GetFileFromPathAsync(string path, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Ensure.NotNullOrEmpty(path, nameof (path));
+            Ensure.NotNullOrEmpty(path, nameof(path));
 
             await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
             return System.IO.File.Exists(path) ? new File(path) : null;
@@ -53,7 +49,7 @@ namespace StandardStorage
         /// <returns>A folder for the specified path, or null if it does not exist.</returns>
         public async Task<IFolder> GetFolderFromPathAsync(string path, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Ensure.NotNullOrEmpty(path, nameof (path));
+            Ensure.NotNullOrEmpty(path, nameof(path));
 
             await AsynchronityUtilities.SwitchOffMainThreadAsync(cancellationToken);
             return Directory.Exists(path) ? new Folder(path, true) : null;

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -11,6 +9,8 @@ using System.Text;
 
 namespace StandardStorage
 {
+    // TODO: Investigate if a better implementation of these utility methods could be found within the classes of the System.Configuration namespace in the PlatformAbstractions library on NuGet.
+
     /// <summary>
     /// A collection of useful storage utilities for finding storage paths.
     /// </summary>
@@ -66,7 +66,6 @@ namespace StandardStorage
             {
                 if (productName == null)
                 {
-
                     // Try custom attribute.
                     object[] attrs = Assembly.GetEntryAssembly()?.GetCustomAttributes(typeof(AssemblyProductAttribute), false);
                     if (attrs != null && attrs.Length > 0)
@@ -88,7 +87,7 @@ namespace StandardStorage
 
                             if (!string.IsNullOrEmpty(ns))
                             {
-                                int lastDot = ns.LastIndexOf(".");
+                                int lastDot = ns.LastIndexOf(".", StringComparison.CurrentCulture);
                                 if (lastDot != -1 && lastDot < ns.Length - 1)
                                     productName = ns.Substring(lastDot + 1);
                                 else productName = ns;
@@ -114,7 +113,6 @@ namespace StandardStorage
             {
                 if (companyName == null)
                 {
-
                     // Try custom attribute.
                     object[] attrs = Assembly.GetEntryAssembly()?.GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
                     if (attrs != null && attrs.Length > 0)
@@ -136,7 +134,7 @@ namespace StandardStorage
 
                             if (!string.IsNullOrEmpty(ns))
                             {
-                                int firstDot = ns.IndexOf(".");
+                                int firstDot = ns.IndexOf(".", StringComparison.CurrentCulture);
                                 if (firstDot != -1)
                                     companyName = ns.Substring(0, firstDot);
                                 else companyName = ns;
@@ -155,23 +153,32 @@ namespace StandardStorage
 
         static FileVersionInfo GetAppFileVersionInfo()
         {
-            if (appFileVersion == null)
+            try
             {
-                Type t = GetAppMainType();
-                if (t != null)
+                if (appFileVersion == null)
                 {
-                    new FileIOPermission(PermissionState.None) { AllFiles = FileIOPermissionAccess.PathDiscovery | FileIOPermissionAccess.Read }.Assert();
+                    Type t = GetAppMainType();
+                    if (t != null)
+                    {
+                        new FileIOPermission(PermissionState.None) { AllFiles = FileIOPermissionAccess.PathDiscovery | FileIOPermissionAccess.Read }.Assert();
 
-                    try { appFileVersion = FileVersionInfo.GetVersionInfo(t.Module.FullyQualifiedName); }
-                    finally { CodeAccessPermission.RevertAssert(); }
+                        try { appFileVersion = FileVersionInfo.GetVersionInfo(t.Module.FullyQualifiedName); }
+                        finally { CodeAccessPermission.RevertAssert(); }
+                    }
+                    else appFileVersion = FileVersionInfo.GetVersionInfo(ExecutablePath);
                 }
-                else appFileVersion = FileVersionInfo.GetVersionInfo(ExecutablePath);
+            }
+            // If this code block executes, that means that the executing assembly path was not found and nothing about the version of the assembly is known and the program is not running direcly in Windows (desktop .NET runtime). This could also mean that the program is not running on a Windows machine at all.
+            catch (DllNotFoundException)
+            {
+                Debug.WriteLine("Couldn't find kernel32.dll and attempting to find any version information at all failed. Assuming non-Windows, and executing WCS method for finding any information about the versioning of the entry assembly. If this fails version 1.0.0.0 will be assumed.");
+                return null;
             }
             return appFileVersion;
         }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetModuleFileName(HandleRef hModule, StringBuilder buffer, int length);
+        static extern int GetModuleFileName(HandleRef hModule, StringBuilder buffer, int length);
 
         /// <summary>
         /// Gets the long path to the module pointed to by <paramref name="hModule"/>.
@@ -240,6 +247,6 @@ namespace StandardStorage
 
         // Get Main type...This doesn't work in MC++ because Main is a global function and not
         // a class static method (it doesn't belong to a Type).
-        private static Type GetAppMainType() => mainType ?? (mainType = Assembly.GetEntryAssembly()?.EntryPoint.ReflectedType);
+        static Type GetAppMainType() => mainType ?? (mainType = Assembly.GetEntryAssembly()?.EntryPoint.ReflectedType);
     }
 }

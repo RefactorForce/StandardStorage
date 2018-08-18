@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace StandardStorage.Test
 {
-    internal class UIDispatcherMock : SynchronizationContext
+    class UIDispatcherMock : SynchronizationContext
     {
-        private readonly object syncObject = new object();
-        private readonly Queue<KeyValuePair<SendOrPostCallback, object>> messageQueue = new Queue<KeyValuePair<SendOrPostCallback, object>>();
+        readonly object syncObject = new object();
+        readonly Queue<KeyValuePair<SendOrPostCallback, object>> messageQueue = new Queue<KeyValuePair<SendOrPostCallback, object>>();
 #if !NETFX_CORE
-        private readonly Thread mainThread;
+        readonly Thread mainThread;
 #endif
-        private bool continueProcessingMessages;
+        bool continueProcessingMessages;
 
         internal UIDispatcherMock()
         {
@@ -49,15 +49,15 @@ namespace StandardStorage.Test
         {
             MainThreadEntrypoint(delegate
             {
-                mainThreadEntrypoint();
+                mainThreadEntrypoint?.Invoke();
                 return Task.FromResult(true);
             });
         }
 
         public static void MainThreadEntrypoint(Func<Task> mainThreadEntrypoint)
         {
-            var syncContext = new UIDispatcherMock();
-            var oldSyncContext = Current;
+            UIDispatcherMock syncContext = new UIDispatcherMock();
+            SynchronizationContext oldSyncContext = Current;
             SetSynchronizationContext(syncContext);
             Exception unhandledException = null;
             syncContext.Post(
@@ -65,7 +65,7 @@ namespace StandardStorage.Test
                 {
                     try
                     {
-                        await mainThreadEntrypoint();
+                        await mainThreadEntrypoint?.Invoke();
                     }
                     catch (Exception ex)
                     {
@@ -92,26 +92,28 @@ namespace StandardStorage.Test
 #else
             if (Thread.CurrentThread == mainThread)
             {
-                d(state);
+                d?.Invoke(state);
             }
             else
             {
-                var completed = new ManualResetEvent(false);
-                Post(
-                    _ =>
-                    {
-                        try
-                        {
-                            d(state);
-                        }
-                        finally
-                        {
-                            completed.Set();
-                        }
-                    },
-                    null);
+                using (ManualResetEvent completed = new ManualResetEvent(false))
+                {
+                    Post(
+_ =>
+{
+try
+{
+        d?.Invoke(state);
+}
+finally
+{
+completed.Set();
+}
+},
+null);
 
-                completed.WaitOne();
+                    completed.WaitOne();
+                }
             }
 #endif
         }
@@ -136,12 +138,12 @@ namespace StandardStorage.Test
 
             while (Continue)
             {
-                var message = DequeueMessage();
+                KeyValuePair<SendOrPostCallback, object> message = DequeueMessage();
                 message.Key?.Invoke(message.Value);
             }
         }
 
-        private KeyValuePair<SendOrPostCallback, object> DequeueMessage()
+        KeyValuePair<SendOrPostCallback, object> DequeueMessage()
         {
             lock (syncObject)
             {
