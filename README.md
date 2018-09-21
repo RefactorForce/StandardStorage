@@ -1,12 +1,8 @@
 # StandardStorage
-A direct reimplementation of PCLStorage in .NET Standard. 
+This repository contains the sources for a cross-platform storage library written in .NET Standard 2.0 called `StandardStorage`. It is heavily based on the now-discontinued `PCLStorage`, and was created out of the need for a lightweight platform-agnostic storage library that only targets .NET Standard, for the sake of simplicity and ease of integration. 
 
 # Note
-This project keeps 100% of the public API of the portable PCLStorage assemblies, and all functionality is externally identical, and all current valid usage of PCLStorage should work perfectly with StandardStorage witout any sort of refactoring. 
-The difference is that this entire project is implemented in pure .NET Standard with a "one size fits all" approach. 
-All platforms that support .NET Standard 2.0 should be able to take advantage of this project without any hiccups.
-
-The only difference is the namespace; change `PCLStorage` to `StandardStorage`, and everything should still be operational.
+A direct reimplementation of `PCLStorage` in .NET Standard 2.0 is contained within the `legacy` branch of this repo; it covers 100% of the `PCLStorage` public API, and uses a similar internal structure.
 
 # Important Warning
 If you have been using PCLStorage, and have hard-coded the storage locations for your app specifically, please note that depending on which path values you used from PCLStorage, the locations may have changed.
