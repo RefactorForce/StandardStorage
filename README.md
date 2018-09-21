@@ -1,4 +1,4 @@
-# StandardStorage
+# StandardStorage Legacy
 A direct reimplementation of PCLStorage in .NET Standard. 
 
 # Note
